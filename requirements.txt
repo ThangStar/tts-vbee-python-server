@@ -1,2 +1,4 @@
 flask==3.1.0
 flask_socketio==5.3.7
+flask_cors
+flask_sqlalchemy
