@@ -1,0 +1,8 @@
+{% extends 'layout/sidebar.html' %}
+{% block main %}
+    {% include 'layout/navbar.html' with context %}
+    <div class="w-full max-w-full mx-auto px-4 py-6">
+        {% block page %}{% endblock %}
+    </div>
+{% endblock %}
+

@@ -1,0 +1,93 @@
+{% extends 'layout/body_main.html' %}
+{% block title %}Quản lý Key{% endblock %}
+{% block page %}
+    <section class="bg-white rounded-xl shadow p-4">
+        <div class="flex items-center justify-between mb-4">
+            <form id="formAddKey" class="flex items-center gap-2">
+                <input id="newKey" class="rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" placeholder="Nhập key mới" required />
+                <input id="newRemain" type="number" min="0" class="w-40 rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" placeholder="Số ký tự còn lại" value="0" required />
+                <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-md">Thêm</button>
+            </form>
+        </div>
+        <div class="overflow-x-auto w-full">
+            <table class="w-full min-w-full text-sm">
+                <thead class="bg-slate-50 text-slate-700">
+                    <tr>
+                        <th class="text-left p-3">ID</th>
+                        <th class="text-left p-3">Key</th>
+                        <th class="text-left p-3">Ký tự còn lại</th>
+                        <th class="text-left p-3">Updated</th>
+                        <th class="text-left p-3">Created</th>
+                        <th class="text-left p-3">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="keysBody">
+                    <tr id="emptyKeys" class="hidden">
+                        <td colspan="6" class="p-6 text-center text-slate-500">Chưa có key nào. Hãy thêm key mới.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Guard: require admin key
+    const ADMIN_KEY = localStorage.getItem('admin_key');
+    if (ADMIN_KEY !== 'anhdagia716') { window.location.replace('/login'); }
+
+    document.getElementById('btnLogout').addEventListener('click', () => {
+        localStorage.removeItem('admin_key');
+        window.location.replace('/login');
+    });
+
+    const keysBody = document.getElementById('keysBody');
+
+    async function loadKeys() {
+        const res = await fetch('/api/keys');
+        const data = await res.json();
+        keysBody.innerHTML = '';
+        if (!data.length) {
+            document.getElementById('emptyKeys').classList.remove('hidden');
+            return;
+        }
+        for (const k of data) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="p-3">${k.id}</td>
+                <td class="p-3"><input data-field="key" data-id="${k.id}" value="${k.key}" class="w-full rounded-md border-gray-300" /></td>
+                <td class="p-3"><input data-field="remaining_chars" data-id="${k.id}" type="number" min="0" value="${k.remaining_chars || 0}" class="w-40 rounded-md border-gray-300" /></td>
+                <td class="p-3">${k.updatedAt || ''}</td>
+                <td class="p-3">${k.createdAt || ''}</td>
+                <td class="p-3 flex gap-2">
+                    <button data-action="delete" data-id="${k.id}" class="px-2 py-1 bg-rose-600 text-white rounded">Xoá</button>
+                </td>`;
+            keysBody.appendChild(tr);
+        }
+    }
+
+    document.getElementById('formAddKey').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const value = document.getElementById('newKey').value.trim();
+        const remain = parseInt(document.getElementById('newRemain').value, 10) || 0;
+        if (!value) return;
+        await fetch('/api/keys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: value, remaining_chars: remain }) });
+        e.target.reset();
+        loadKeys();
+    });
+
+    keysBody.addEventListener('change', async (e) => {
+        const input = e.target;
+        const id = input.getAttribute('data-id');
+        if (!id) return;
+        const keyInput = keysBody.querySelector(`input[data-field="key"][data-id="${id}"]`);
+        const remainInput = keysBody.querySelector(`input[data-field="remaining_chars"][data-id="${id}"]`);
+        await fetch(`/api/keys/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: keyInput.value, remaining_chars: Number(remainInput.value || 0) }) });
+        loadKeys();
+    });
+
+    loadKeys();
+</script>
+{% endblock %}
+

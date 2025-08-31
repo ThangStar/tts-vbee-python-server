@@ -1,0 +1,16 @@
+{% extends 'layout/base.html' %}
+{% block title %}Redirecting...{% endblock %}
+{% block body %}
+<div class="p-6 text-center text-gray-600">Đang chuyển hướng...</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    // Redirect to login or manager depending on localStorage
+    const ADMIN_KEY = localStorage.getItem('admin_key');
+    if (ADMIN_KEY === 'anhdagia716') {
+        window.location.replace('/manager/key');
+    } else {
+        window.location.replace('/login');
+    }
+    </script>
+{% endblock %}

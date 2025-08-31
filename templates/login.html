@@ -1,0 +1,45 @@
+{% extends 'layout/base.html' %}
+{% block title %}Admin Login{% endblock %}
+{% block body %}
+<div class="min-h-screen flex items-center justify-center px-4">
+    <div class="w-full max-w-sm bg-white/90 backdrop-blur shadow-xl rounded-2xl p-6">
+        <h1 class="text-2xl font-bold text-slate-900 mb-6 text-center">Admin Login</h1>
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Nhập key</label>
+                <input id="keyInput" type="password" class="w-full rounded-md border-slate-300 focus:border-indigo-500 focus:ring-indigo-500" placeholder="admin key" required />
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-md">Đăng nhập</button>
+        </form>
+        <p id="error" class="text-sm text-red-600 mt-3 hidden">Key không đúng.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script>
+    const form = document.getElementById('loginForm');
+    const input = document.getElementById('keyInput');
+    const error = document.getElementById('error');
+    // Nếu đã có key đúng thì vào thẳng dashboard
+    let ADMIN_KEY = localStorage.getItem('admin_key');
+    ADMIN_KEY =  CryptoJS.MD5(ADMIN_KEY).toString();
+    if (ADMIN_KEY === "1b6fa9eeddb148b222ca507131d0e698") {
+        window.location.replace('/manager/key');
+    }
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const value = input.value.trim();
+        const cryptedValue = CryptoJS.MD5(value).toString();
+        if (cryptedValue === "1b6fa9eeddb148b222ca507131d0e698") {
+            localStorage.setItem('admin_key', value);
+            window.location.replace('/manager/key');
+        } else {
+            error.classList.remove('hidden');
+        }
+    });
+</script>
+{% endblock %}
+

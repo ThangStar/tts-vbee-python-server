@@ -1,0 +1,18 @@
+{% extends 'layout/base.html' %}
+{% block body %}
+<div class="min-h-screen flex">
+    <aside class="w-64 shrink-0 bg-white/80 backdrop-blur border-r">
+        <div class="px-4 py-4 border-b">
+            <div class="text-lg font-bold">Admin</div>
+        </div>
+        <nav class="p-3 space-y-1">
+            <a href="/manager/key" class="block px-3 py-2 rounded hover:bg-indigo-50 text-slate-700">Quản lý Key</a>
+            <a href="/manager/tts" class="block px-3 py-2 rounded hover:bg-indigo-50 text-slate-700">Danh sách chờ TTS</a>
+        </nav>
+    </aside>
+    <main class="flex-1 min-w-0">
+        {% block main %}{% endblock %}
+    </main>
+</div>
+{% endblock %}
+
