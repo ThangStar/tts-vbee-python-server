@@ -403,7 +403,7 @@ def emit_socket_event():
         if not target_socket_id:
             return jsonify({'ok': False, 'error': 'Missing socket_id'}), 400
         
-        print(f"HTTP triggered: Emitting to socket {target_socket_id}: {event_name} with data {event_data}")
+        print(f"HTTP triggered: Emitting to socket {target_socket_id}: {event_name}")
         
         # Emit to the target socket
         socketio.emit(event_name, event_data, to=target_socket_id)
