@@ -1,7 +1,9 @@
 {
-    "profile_1": {
-        "url": "",
-        "proxy": "",
-        "user_agent": ""
-    }
+  "profile_1": {
+    "url": "",
+    "proxy": "",
+    "user_agent": ""
+  },
+  "username": "marketing@vbee.vn",
+  "password": "anhyeuem"
 }
