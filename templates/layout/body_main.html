@@ -1,8 +1,10 @@
 {% extends 'layout/sidebar.html' %}
 {% block main %}
     {% include 'layout/navbar.html' with context %}
-    <div class="w-full max-w-full mx-auto px-4 py-6">
-        {% block page %}{% endblock %}
+    <div class="flex-grow-1 p-3 p-md-4">
+        <div class="container-fluid">
+            {% block page %}{% endblock %}
+        </div>
     </div>
 {% endblock %}
 

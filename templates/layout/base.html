@@ -3,13 +3,341 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}App{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{% block title %}TTS Management System{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #06b6d4;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+            --border-radius: 0.75rem;
+            --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 75%, #cbd5e1 100%);
+            min-height: 100vh;
+        }
+        
+        /* Alternative lighter background options */
+        /* Option 1: Very light blue gradient */
+        /* background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%); */
+        
+        /* Option 2: Light purple gradient */
+        /* background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 50%, #e9d5ff 100%); */
+        
+        /* Option 3: Light green gradient */
+        /* background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%); */
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-custom {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .form-control-custom {
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control-custom:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+        }
+
+        .table-custom {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+        }
+
+        .table-custom thead th {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border: none;
+            font-weight: 600;
+            color: var(--dark-color);
+            padding: 1rem;
+        }
+
+        .table-custom tbody td {
+            padding: 1rem;
+            border-color: #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .badge-custom {
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .sidebar-custom {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+            min-height: 100vh;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.02);
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            z-index: 1020 !important;
+            overflow-y: auto;
+        }
+        
+        /* Hide sidebar on mobile by default */
+        @media (max-width: 991.98px) {
+            .sidebar-custom {
+                left: -100% !important;
+                transition: left 0.3s ease;
+            }
+        }
+
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 1030 !important;
+            width: 100% !important;
+        }
+        
+        /* Ensure navbar stays on top during scroll */
+        .navbar {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 1030 !important;
+        }
+        
+        /* Fix for mobile devices */
+        @media (max-width: 991.98px) {
+            .navbar-custom {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 1030 !important;
+            }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            border: 0.25rem solid #f3f3f3;
+            border-top: 0.25rem solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Main content adjustment for fixed sidebar */
+        main {
+            margin-left: 280px !important;
+            transition: margin-left 0.3s ease;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 991.98px) {
+            .sidebar-custom {
+                position: fixed !important;
+                top: 0 !important;
+                left: -100% !important;
+                width: 280px !important;
+                z-index: 1050 !important;
+                transition: left 0.3s ease !important;
+            }
+            
+            .sidebar-custom.show {
+                left: 0 !important;
+            }
+            
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1040;
+                display: none;
+            }
+            
+            .sidebar-overlay.show {
+                display: block;
+            }
+            
+            /* Remove margin on mobile */
+            main {
+                margin-left: 0 !important;
+            }
+        }
+    </style>
+    
     {% block head %}{% endblock %}
-    <style></style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 text-slate-800">
+<body>
     {% block body %}{% endblock %}
+    
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script>
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar-custom');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+            }
+        }
+
+        // Close sidebar when clicking overlay
+        document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (overlay) {
+                overlay.addEventListener('click', toggleSidebar);
+            }
+        });
+
+        // Add fade-in animation to main content
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainContent = document.querySelector('main');
+            if (mainContent) {
+                mainContent.classList.add('fade-in');
+            }
+        });
+
+        // Ensure navbar stays on top during scroll
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar-custom');
+            if (navbar) {
+                navbar.style.position = 'sticky';
+                navbar.style.top = '0';
+                navbar.style.zIndex = '1030';
+            }
+        });
+
+        // Fix navbar position on page load
+        window.addEventListener('load', function() {
+            const navbar = document.querySelector('.navbar-custom');
+            if (navbar) {
+                navbar.style.position = 'sticky';
+                navbar.style.top = '0';
+                navbar.style.zIndex = '1030';
+            }
+        });
+
+        // Ensure sidebar stays fixed during scroll
+        window.addEventListener('scroll', function() {
+            const sidebar = document.querySelector('.sidebar-custom');
+            if (sidebar) {
+                sidebar.style.position = 'fixed';
+                sidebar.style.top = '0';
+                sidebar.style.left = '0';
+                sidebar.style.zIndex = '1020';
+            }
+        });
+
+        // Fix sidebar position on page load
+        window.addEventListener('load', function() {
+            const sidebar = document.querySelector('.sidebar-custom');
+            if (sidebar) {
+                sidebar.style.position = 'fixed';
+                sidebar.style.top = '0';
+                sidebar.style.left = '0';
+                sidebar.style.zIndex = '1020';
+                sidebar.style.height = '100vh';
+                sidebar.style.overflowY = 'auto';
+                
+                // Hide sidebar on mobile by default
+                if (window.innerWidth <= 991.98) {
+                    sidebar.style.left = '-100%';
+                }
+            }
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.querySelector('.sidebar-custom');
+            if (sidebar) {
+                if (window.innerWidth <= 991.98) {
+                    // Mobile: hide sidebar
+                    sidebar.style.left = '-100%';
+                    sidebar.classList.remove('show');
+                } else {
+                    // Desktop: show sidebar
+                    sidebar.style.left = '0';
+                }
+            }
+        });
+    </script>
+    
     {% block scripts %}{% endblock %}
 </body>
 </html>

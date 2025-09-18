@@ -1,229 +1,594 @@
 {% extends 'layout/body_main.html' %}
-{% block title %}Danh sách chờ TTS{% endblock %}
+{% block title %}Quản lý TTS{% endblock %}
 {% block page %}
-    <section class="bg-white rounded-xl shadow p-4">
-        <form id="formAddTTS" class="flex flex-col gap-3 mb-4">
-            <div class="flex flex-wrap items-center gap-2">
-            <select id="ttsKey" class="min-w-[12rem] rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" required>
-                <option value="" selected disabled>Chọn key</option>
-            </select>
-            <input id="ttsChars" type="number" min="0" class="w-32 rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" placeholder="Số ký tự" required />
-            <select id="ttsStatus" class="rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
-                <option value="pending">đang chờ</option>
-                <option value="done">hoàn thành</option>
-                <option value="error">lỗi</option>
-            </select>
-            </div>
-            <textarea id="ttsContent" rows="4" class="w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" placeholder="Nội dung TTS (1 - 100000 ký tự)"></textarea>
-            <div class="flex flex-wrap items-center gap-2">
-                <input id="ttsUrl" type="url" class="flex-1 rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" placeholder="URL (tùy chọn)" />
-                <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-md">Thêm</button>
-            </div>
-        </form>
-        
-        <!-- Delete All Button -->
-        <div class="flex justify-between items-center mb-4">
-            <div class="text-sm text-gray-600">
-                <span id="totalCount">0</span> mục TTS
-            </div>
-            <button id="deleteAllBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
-                Xóa tất cả TTS
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <div>
+            <h2 class="h4 fw-bold text-dark mb-1">
+                <i class="bi bi-mic-fill me-2 text-primary"></i>
+                Quản lý TTS
+            </h2>
+            <p class="text-muted mb-0">Quản lý danh sách chờ và xử lý TTS</p>
+        </div>
+        <div class="mt-3 mt-md-0">
+            <span class="badge bg-primary fs-6" id="totalCount">0 mục TTS</span>
+        </div>
+    </div>
+
+    <!-- Add TTS Form -->
+    <div class="card mb-4">
+        <div class="card-header bg-transparent border-0 pb-0">
+            <h5 class="card-title fw-semibold mb-0">
+                <i class="bi bi-plus-circle me-2 text-success"></i>
+                Thêm TTS Mới
+            </h5>
+        </div>
+        <div class="card-body">
+            <form id="formAddTTS" class="row g-3">
+                <div class="col-12 col-md-3">
+                    <label for="ttsKey" class="form-label fw-semibold">
+                        <i class="bi bi-key me-1"></i>Key API
+                    </label>
+                    <select id="ttsKey" class="form-select" required>
+                        <option value="" selected disabled>Chọn key</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-2">
+                    <label for="ttsChars" class="form-label fw-semibold">
+                        <i class="bi bi-hash me-1"></i>Số ký tự
+                    </label>
+                    <input id="ttsChars" type="number" min="0" class="form-control" placeholder="0" required />
+                </div>
+                <div class="col-12 col-md-2">
+                    <label for="ttsStatus" class="form-label fw-semibold">
+                        <i class="bi bi-flag me-1"></i>Trạng thái
+                    </label>
+                    <select id="ttsStatus" class="form-select">
+                        <option value="pending">Đang chờ</option>
+                        <option value="done">Hoàn thành</option>
+                        <option value="error">Lỗi</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-3">
+                    <label for="ttsVoice" class="form-label fw-semibold">
+                        <i class="bi bi-mic me-1"></i>Voice
+                    </label>
+                    <input id="ttsVoice" type="text" class="form-control" placeholder="Voice" />
+                </div>
+                <div class="col-12 col-md-3">
+                    <label for="ttsSpeech" class="form-label fw-semibold">
+                        <i class="bi bi-soundwave me-1"></i>Speech
+                    </label>
+                    <input id="ttsSpeech" type="text" class="form-control" placeholder="Speech" />
+                </div>
+                <div class="col-12 col-md-3">
+                    <label for="ttsPunctuation" class="form-label fw-semibold">
+                        <i class="bi bi-punctuation me-1"></i>Punctuation
+                    </label>
+                    <input id="ttsPunctuation" type="text" class="form-control" placeholder="0.45,0.25,0.3,0.6" value="0.45,0.25,0.3,0.6" />
+                </div>
+                <div class="col-12 col-md-6">
+                    <label for="ttsUrl" class="form-label fw-semibold">
+                        <i class="bi bi-link me-1"></i>URL (tùy chọn)
+                    </label>
+                    <input id="ttsUrl" type="url" class="form-control" placeholder="https://example.com" />
+                </div>
+                <div class="col-12">
+                    <label for="ttsContent" class="form-label fw-semibold">
+                        <i class="bi bi-chat-text me-1"></i>Nội dung TTS
+                    </label>
+                    <textarea id="ttsContent" rows="4" class="form-control" placeholder="Nhập nội dung cần chuyển đổi thành giọng nói (1 - 100000 ký tự)" required></textarea>
+                    <div class="form-text">Nội dung sẽ được chuyển đổi thành file âm thanh</div>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-plus-lg me-1"></i>
+                        Thêm TTS
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- TTS List -->
+    <div class="card">
+        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+            <h5 class="card-title fw-semibold mb-0">
+                <i class="bi bi-list-ul me-2 text-primary"></i>
+                Danh sách TTS
+            </h5>
+            <button id="deleteAllBtn" class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-trash me-1"></i>
+                Xóa tất cả
             </button>
         </div>
-        <div class="overflow-x-auto w-full">
-            <table class="w-full min-w-full text-sm">
-                <thead class="bg-slate-50 text-slate-700">
-                    <tr>
-                        <th class="text-left p-2">ID</th>
-                        <th class="text-left p-2">Key</th>
-                        <th class="text-left p-2">Ký tự</th>
-                        <th class="text-left p-2">Nội dung</th>
-                        <th class="text-left p-2">Trạng thái</th>
-                        <th class="text-left p-2">URL</th>
-                        <th class="text-left p-2">Connection ID</th>
-                        <th class="text-left p-2">Updated</th>
-                        <th class="text-left p-2">Created</th>
-                        <th class="text-left p-2">Hành động</th>
-                    </tr>
-                </thead>
-                <tbody id="ttsBody">
-                    <tr id="emptyTTS" class="hidden">
-                        <td colspan="10" class="p-6 text-center text-slate-500">Chưa có mục nào trong hàng đợi.</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="border-0">
+                                <i class="bi bi-hash me-1"></i>ID
+                            </th>
+                            <th class="border-0">
+                                <i class="bi bi-key me-1"></i>Key
+                            </th>
+                            <th class="border-0">
+                                <i class="bi bi-hash me-1"></i>Ký tự
+                            </th>
+                            <th class="border-0">
+                                <i class="bi bi-chat-text me-1"></i>Nội dung
+                            </th>
+                            <th class="border-0">
+                                <i class="bi bi-flag me-1"></i>Trạng thái
+                            </th>
+                            <th class="border-0">
+                                <i class="bi bi-mic me-1"></i>Voice
+                            </th>
+                            <th class="border-0">
+                                <i class="bi bi-soundwave me-1"></i>Speech
+                            </th>
+                            <th class="border-0">
+                                <i class="bi bi-punctuation me-1"></i>Dấu câu (Chấm, phẩy, chấm phẩy, giữa các đoạn)
+                            </th>
+                            <th class="border-0">
+                                <i class="bi bi-link me-1"></i>URL
+                            </th>
+                            <th class="border-0">
+                                <i class="bi bi-wifi me-1"></i>Connection
+                            </th>
+                            <th class="border-0">
+                                <i class="bi bi-clock me-1"></i>Cập nhật
+                            </th>
+                            <th class="border-0">
+                                <i class="bi bi-calendar me-1"></i>Tạo lúc
+                            </th>
+                            <th class="border-0 text-center">
+                                <i class="bi bi-gear me-1"></i>Hành động
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="ttsBody">
+                        <tr id="emptyTTS" class="d-none">
+                            <td colspan="13" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                                    <h6 class="fw-semibold">Chưa có TTS nào</h6>
+                                    <p class="mb-0">Hãy thêm TTS mới để bắt đầu xử lý</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         
-        <!-- Pagination Controls -->
-        <div id="paginationControls" class="flex justify-between items-center mt-4 px-2">
-            <div class="text-sm text-gray-600">
-                Trang <span id="currentPage">1</span> / <span id="totalPages">1</span>
-            </div>
-            <div class="flex gap-2">
-                <button id="prevPage" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                    Trước
-                </button>
-                <button id="nextPage" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                    Sau
-                </button>
+        <!-- Pagination -->
+        <div class="card-footer bg-transparent border-0">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                <div class="text-muted small mb-2 mb-md-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Trang <span id="currentPage" class="fw-semibold">1</span> / <span id="totalPages" class="fw-semibold">1</span>
+                </div>
+                <div class="btn-group" role="group">
+                    <button id="prevPage" class="btn btn-outline-secondary btn-sm" disabled>
+                        <i class="bi bi-chevron-left me-1"></i>
+                        Trước
+                    </button>
+                    <button id="nextPage" class="btn btn-outline-secondary btn-sm" disabled>
+                        Sau
+                        <i class="bi bi-chevron-right ms-1"></i>
+                    </button>
+                </div>
             </div>
         </div>
-    </section>
+    </div>
+{% endblock %}
+
+{% block head %}
+<style>
+    /* Custom styling for TTS page */
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+    }
+    
+    .form-control, .form-select {
+        border: 2px solid #e2e8f0;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+    }
+    
+    .table {
+        background: white;
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+    
+    .table thead th {
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border: none;
+        font-weight: 600;
+        color: #1e293b;
+        padding: 1rem;
+    }
+    
+    .table tbody td {
+        padding: 1rem;
+        border-color: #f1f5f9;
+        vertical-align: middle;
+    }
+    
+    .btn {
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-1px);
+    }
+    
+    .badge {
+        border-radius: 2rem;
+        font-weight: 500;
+    }
+</style>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    // Guard: require admin key
-    const ADMIN_KEY = localStorage.getItem('admin_key');
-    if (ADMIN_KEY !== 'anhdagia716') { window.location.replace('/login'); }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Guard: require admin key
+        const ADMIN_KEY = localStorage.getItem('admin_key');
+        if (ADMIN_KEY !== 'anhdagia716') { 
+            window.location.replace('/login'); 
+            return;
+        }
 
-    document.getElementById('btnLogout').addEventListener('click', () => {
-        localStorage.removeItem('admin_key');
-        window.location.replace('/login');
-    });
+        // Logout functionality
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            localStorage.removeItem('admin_key');
+            window.location.replace('/login');
+        });
 
-    const ttsBody = document.getElementById('ttsBody');
-    const ttsKeySelect = document.getElementById('ttsKey');
-    let KEY_OPTIONS = [];
-    let currentPage = 1;
-    let totalPages = 1;
-    let totalItems = 0;
-
-    function statusBadge(status) {
-        const map = {
-            pending: 'bg-blue-100 text-blue-700',
-            done: 'bg-emerald-100 text-emerald-700',
-            error: 'bg-rose-100 text-rose-700',
-        };
-        const cls = map[status] || 'bg-gray-100 text-gray-700';
-        const label = status === 'pending' ? 'đang chờ' : (status === 'done' ? 'hoàn thành' : (status === 'error' ? 'lỗi' : status));
-        return `<span class="px-2 py-1 rounded text-xs font-medium ${cls}">${label}</span>`;
-    }
-
-    async function loadKeysOptions() {
-        const res = await fetch('/api/keys');
-        KEY_OPTIONS = await res.json();
-        ttsKeySelect.innerHTML = '<option value="" disabled selected>Chọn key</option>' +
-            KEY_OPTIONS.map(k => `<option value="${k.key}">${k.key}</option>`).join('');
-    }
-
-    async function loadTTS(page = 1) {
-        const res = await fetch(`/api/tts?page=${page}&per_page=20`);
-        const data = await res.json();
+        const ttsBody = document.getElementById('ttsBody');
+        const ttsKeySelect = document.getElementById('ttsKey');
+        const totalCount = document.getElementById('totalCount');
         
-        // Update pagination info
-        currentPage = data.pagination.page;
-        totalPages = data.pagination.pages;
-        totalItems = data.pagination.total;
+        // Helper function to safely get elements
+        function safeGetElement(id, required = true) {
+            const element = document.getElementById(id);
+            if (!element && required) {
+                console.error(`Element with id '${id}' not found`);
+            }
+            return element;
+        }
         
-        // Update UI elements
-        document.getElementById('currentPage').textContent = currentPage;
-        document.getElementById('totalPages').textContent = totalPages;
-        document.getElementById('totalCount').textContent = totalItems;
-        
-        // Update pagination buttons
-        document.getElementById('prevPage').disabled = !data.pagination.has_prev;
-        document.getElementById('nextPage').disabled = !data.pagination.has_next;
-        
-        ttsBody.innerHTML = '';
-        if (!data.items.length) {
-            document.getElementById('emptyTTS').classList.remove('hidden');
+        // Check if required elements exist
+        if (!ttsBody) {
+            console.error('ttsBody element not found');
+            return;
+        }
+        if (!ttsKeySelect) {
+            console.error('ttsKeySelect element not found');
+            return;
+        }
+        if (!totalCount) {
+            console.error('totalCount element not found');
             return;
         }
         
-        for (const t of data.items) {
-            const tr = document.createElement('tr');
-            const options = KEY_OPTIONS.map(k => `<option value="${k.key}" ${t.key===k.key?'selected':''}>${k.key}</option>`).join('');
-            tr.innerHTML = `
-                <td class=\"p-2\">${t.id}</td>
-                <td class=\"p-2\">
-                    <select data-field=\"key\" data-id=\"${t.id}\" class=\"min-w-[12rem] rounded-md border-gray-300\">${options}</select>
-                </td>
-                <td class=\"p-2\"><input data-field=\"text_char_count\" data-id=\"${t.id}\" type=\"number\" value=\"${t.text_char_count}\" class=\"w-24 rounded-md border-gray-300\" /></td>
-                <td class=\"p-2 max-w-[24rem] truncate\" title=\"${(t.content || '').replace(/\"/g,'\\\"')}\">${(t.content || '').slice(0,50)}${(t.content||'').length>50?'...':''}</td>
-                <td class=\"p-2\">${statusBadge(t.status)}</td>
-                <td class=\"p-2\">
-                    <input data-field=\"url\" data-id=\"${t.id}\" type=\"url\" value=\"${t.url || ''}\" class=\"w-full rounded-md border-gray-300 text-xs\" placeholder=\"URL\" />
-                </td>
-                <td class=\"p-2 text-xs text-gray-500 font-mono\">${t.connection_id || '-'}</td>
-                <td class=\"p-2\">${t.updatedAt || ''}</td>
-                <td class=\"p-2\">${t.createdAt || ''}</td>
-                <td class=\"p-2 flex gap-2\">
-                    <button data-action=\"delete\" data-id=\"${t.id}\" class=\"px-2 py-1 bg-rose-600 text-white rounded\">Xoá</button>
-                </td>`;
-            ttsBody.appendChild(tr);
+        let KEY_OPTIONS = [];
+        let currentPage = 1;
+        let totalPages = 1;
+        let totalItems = 0;
+
+        function statusBadge(status) {
+            const map = {
+                pending: 'bg-warning text-dark',
+                done: 'bg-success text-white',
+                error: 'bg-danger text-white',
+            };
+            const cls = map[status] || 'bg-secondary text-white';
+            const label = status === 'pending' ? 'Đang chờ' : (status === 'done' ? 'Hoàn thành' : (status === 'error' ? 'Lỗi' : status));
+            return `<span class="badge ${cls}">${label}</span>`;
         }
-    }
 
-    document.getElementById('formAddTTS').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const keyValue = ttsKeySelect.value;
-        const chars = parseInt(document.getElementById('ttsChars').value, 10);
-        const status = document.getElementById('ttsStatus').value;
-        const content = document.getElementById('ttsContent').value;
-        const url = document.getElementById('ttsUrl').value;
-        await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: keyValue, text_char_count: chars, status, content, url }) });
-        e.target.reset();
-        await loadKeysOptions();
-        loadTTS(1); // Reset to first page after adding new item
-    });
-
-    ttsBody.addEventListener('change', async (e) => {
-        const input = e.target;
-        const id = input.getAttribute('data-id');
-        if (!id) return;
-        const payload = {};
-        for (const field of ['key','text_char_count','url']) {
-            const el = ttsBody.querySelector(`[data-field=\"${field}\"][data-id=\"${id}\"]`);
-            if (el) payload[field] = el.type === 'number' ? Number(el.value) : el.value;
-        }
-        await fetch(`/api/tts/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        loadTTS(currentPage);
-    });
-
-    ttsBody.addEventListener('click', async (e) => {
-        const target = e.target;
-        const id = target.getAttribute('data-id');
-        const action = target.getAttribute('data-action');
-        if (!id || !action) return;
-        if (action === 'delete') {
-            await fetch(`/api/tts/${id}`, { method: 'DELETE' });
-        }
-        loadTTS(currentPage);
-    });
-
-    // Pagination event listeners
-    document.getElementById('prevPage').addEventListener('click', () => {
-        if (currentPage > 1) {
-            loadTTS(currentPage - 1);
-        }
-    });
-
-    document.getElementById('nextPage').addEventListener('click', () => {
-        if (currentPage < totalPages) {
-            loadTTS(currentPage + 1);
-        }
-    });
-
-    // Delete all TTS event listener
-    document.getElementById('deleteAllBtn').addEventListener('click', async () => {
-        if (confirm('Bạn có chắc chắn muốn xóa tất cả TTS? Hành động này không thể hoàn tác.')) {
+        async function loadKeysOptions() {
             try {
-                const response = await fetch('/api/tts/delete-all', { method: 'DELETE' });
-                const result = await response.json();
-                if (result.ok) {
-                    alert('Đã xóa tất cả TTS thành công!');
-                    loadTTS(1); // Reset to first page
-                } else {
-                    alert('Có lỗi xảy ra: ' + (result.error || 'Không xác định'));
-                }
+                const res = await fetch('/api/keys');
+                KEY_OPTIONS = await res.json();
+                ttsKeySelect.innerHTML = '<option value="" disabled selected>Chọn key</option>' +
+                    KEY_OPTIONS.map(k => `<option value="${k.key}">${k.key}</option>`).join('');
             } catch (error) {
-                alert('Có lỗi xảy ra: ' + error.message);
+                console.error('Error loading keys:', error);
+                showAlert('Lỗi khi tải danh sách keys', 'danger');
             }
         }
-    });
 
-    (async () => { await loadKeysOptions(); await loadTTS(1); })();
+        async function loadTTS(page = 1) {
+            try {
+                const res = await fetch(`/api/tts?page=${page}&per_page=20`);
+                const data = await res.json();
+                
+                // Update pagination info
+                currentPage = data.pagination.page;
+                totalPages = data.pagination.pages;
+                totalItems = data.pagination.total;
+                
+                // Update UI elements
+                document.getElementById('currentPage').textContent = currentPage;
+                document.getElementById('totalPages').textContent = totalPages;
+                totalCount.textContent = `${totalItems} mục TTS`;
+                
+                // Update pagination buttons
+                document.getElementById('prevPage').disabled = !data.pagination.has_prev;
+                document.getElementById('nextPage').disabled = !data.pagination.has_next;
+                
+                ttsBody.innerHTML = '';
+                if (!data.items.length) {
+                    const emptyTTSElement = document.getElementById('emptyTTS');
+                    if (emptyTTSElement) {
+                        emptyTTSElement.classList.remove('d-none');
+                    }
+                    return;
+                }
+                
+                const emptyTTSElement = document.getElementById('emptyTTS');
+                if (emptyTTSElement) {
+                    emptyTTSElement.classList.add('d-none');
+                }
+                
+                for (const t of data.items) {
+                    const tr = document.createElement('tr');
+                    const options = KEY_OPTIONS.map(k => `<option value="${k.key}" ${t.key===k.key?'selected':''}>${k.key}</option>`).join('');
+                    tr.innerHTML = `
+                        <td class="align-middle">
+                            <span class="badge bg-secondary">${t.id}</span>
+                        </td>
+                        <td class="align-middle">
+                            <select data-field="key" data-id="${t.id}" class="form-select form-select-sm" style="min-width: 150px;">
+                                ${options}
+                            </select>
+                        </td>
+                        <td class="align-middle">
+                            <input data-field="text_char_count" data-id="${t.id}" type="number" value="${t.text_char_count}" class="form-control form-control-sm" style="width: 80px;" />
+                        </td>
+                        <td class="align-middle" style="max-width: 200px;">
+                            <div class="text-truncate" title="${(t.content || '').replace(/"/g,'&quot;')}">
+                                ${(t.content || '').slice(0,50)}${(t.content||'').length>50?'...':''}
+                            </div>
+                        </td>
+                        <td class="align-middle">${statusBadge(t.status)}</td>
+                        <td class="align-middle">
+                            <input data-field="voice" data-id="${t.id}" type="text" value="${t.voice || ''}" class="form-control form-control-sm" placeholder="Voice" style="min-width: 120px;" />
+                        </td>
+                        <td class="align-middle">
+                            <input data-field="speech" data-id="${t.id}" type="text" value="${t.speech || ''}" class="form-control form-control-sm" placeholder="Speech" style="min-width: 120px;" />
+                        </td>
+                        <td class="align-middle">
+                            <input data-field="punctuation" data-id="${t.id}" type="text" value="${t.punctuation || '0.45,0.25,0.3,0.6'}" class="form-control form-control-sm" placeholder="0.45,0.25,0.3,0.6" style="min-width: 120px;" />
+                        </td>
+                        <td class="align-middle">
+                            <input data-field="url" data-id="${t.id}" type="url" value="${t.url || ''}" class="form-control form-control-sm" placeholder="URL" style="min-width: 120px;" />
+                        </td>
+                        <td class="align-middle text-muted small font-monospace">
+                            ${t.connection_id ? t.connection_id.slice(0,8) + '...' : '-'}
+                        </td>
+                        <td class="align-middle text-muted small">
+                            ${t.updatedAt ? new Date(t.updatedAt).toLocaleString('vi-VN') : '-'}
+                        </td>
+                        <td class="align-middle text-muted small">
+                            ${t.createdAt ? new Date(t.createdAt).toLocaleString('vi-VN') : '-'}
+                        </td>
+                        <td class="align-middle text-center">
+                            <button data-action="delete" data-id="${t.id}" class="btn btn-outline-danger btn-sm" title="Xóa TTS">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>`;
+                    ttsBody.appendChild(tr);
+                }
+            } catch (error) {
+                console.error('Error loading TTS:', error);
+                showAlert('Lỗi khi tải danh sách TTS: ' + error.message, 'danger');
+                // Show empty state on error
+                const emptyTTSElement = document.getElementById('emptyTTS');
+                if (emptyTTSElement) {
+                    emptyTTSElement.classList.remove('d-none');
+                }
+                if (totalCount) {
+                    totalCount.textContent = '0 mục TTS';
+                }
+            }
+        }
+
+        // Add new TTS
+        const formAddTTS = safeGetElement('formAddTTS');
+        if (!formAddTTS) {
+            console.error('formAddTTS element not found');
+            return;
+        }
+        
+        formAddTTS.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const ttsCharsElement = safeGetElement('ttsChars');
+            const ttsStatusElement = safeGetElement('ttsStatus');
+            const ttsContentElement = safeGetElement('ttsContent');
+            const ttsUrlElement = safeGetElement('ttsUrl');
+            const ttsVoiceElement = safeGetElement('ttsVoice');
+            const ttsSpeechElement = safeGetElement('ttsSpeech');
+            const ttsPunctuationElement = safeGetElement('ttsPunctuation');
+            
+            if (!ttsCharsElement || !ttsStatusElement || !ttsContentElement || !ttsUrlElement || !ttsVoiceElement || !ttsSpeechElement || !ttsPunctuationElement) {
+                showAlert('Không thể tìm thấy các trường input', 'danger');
+                return;
+            }
+            
+            const keyValue = ttsKeySelect.value;
+            const chars = parseInt(ttsCharsElement.value, 10);
+            const status = ttsStatusElement.value;
+            const content = ttsContentElement.value;
+            const url = ttsUrlElement.value;
+            const voice = ttsVoiceElement.value;
+            const speech = ttsSpeechElement.value;
+            const punctuation = ttsPunctuationElement.value;
+            
+            if (!keyValue || !content.trim()) {
+                showAlert('Vui lòng điền đầy đủ thông tin', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/tts', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ key: keyValue, text_char_count: chars, status, content, url, voice, speech, punctuation }) 
+                });
+                
+                if (response.ok) {
+                    showAlert('Thêm TTS thành công!', 'success');
+                    e.target.reset();
+                    await loadKeysOptions();
+                    loadTTS(1); // Reset to first page after adding new item
+                } else {
+                    showAlert('Lỗi khi thêm TTS', 'danger');
+                }
+            } catch (error) {
+                console.error('Error adding TTS:', error);
+                showAlert('Lỗi khi thêm TTS', 'danger');
+            }
+        });
+
+        // Edit TTS
+        ttsBody.addEventListener('change', async (e) => {
+            const input = e.target;
+            const id = input.getAttribute('data-id');
+            if (!id) return;
+            
+            const payload = {};
+            for (const field of ['key','text_char_count','voice','speech','punctuation','url']) {
+                const el = ttsBody.querySelector(`[data-field="${field}"][data-id="${id}"]`);
+                if (el) payload[field] = el.type === 'number' ? Number(el.value) : el.value;
+            }
+            
+            try {
+                await fetch(`/api/tts/${id}`, { 
+                    method: 'PUT', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(payload) 
+                });
+                showAlert('Cập nhật TTS thành công!', 'success');
+                loadTTS(currentPage);
+            } catch (error) {
+                console.error('Error updating TTS:', error);
+                showAlert('Lỗi khi cập nhật TTS', 'danger');
+            }
+        });
+
+        // Delete TTS
+        ttsBody.addEventListener('click', async (e) => {
+            const target = e.target.closest('button');
+            if (!target || target.getAttribute('data-action') !== 'delete') return;
+            
+            const id = target.getAttribute('data-id');
+            if (!id) return;
+            
+            if (confirm('Bạn có chắc chắn muốn xóa TTS này?')) {
+                try {
+                    await fetch(`/api/tts/${id}`, { method: 'DELETE' });
+                    showAlert('Xóa TTS thành công!', 'success');
+                    loadTTS(currentPage);
+                } catch (error) {
+                    console.error('Error deleting TTS:', error);
+                    showAlert('Lỗi khi xóa TTS', 'danger');
+                }
+            }
+        });
+
+        // Pagination event listeners
+        const prevPageBtn = safeGetElement('prevPage');
+        const nextPageBtn = safeGetElement('nextPage');
+        const deleteAllBtn = safeGetElement('deleteAllBtn');
+        
+        if (prevPageBtn) {
+            prevPageBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    loadTTS(currentPage - 1);
+                }
+            });
+        }
+
+        if (nextPageBtn) {
+            nextPageBtn.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    loadTTS(currentPage + 1);
+                }
+            });
+        }
+
+        // Delete all TTS event listener
+        if (deleteAllBtn) {
+            deleteAllBtn.addEventListener('click', async () => {
+                if (confirm('Bạn có chắc chắn muốn xóa tất cả TTS? Hành động này không thể hoàn tác.')) {
+                    try {
+                        const response = await fetch('/api/tts/delete-all', { method: 'DELETE' });
+                        const result = await response.json();
+                        if (result.ok) {
+                            showAlert('Đã xóa tất cả TTS thành công!', 'success');
+                            loadTTS(1); // Reset to first page
+                        } else {
+                            showAlert('Có lỗi xảy ra: ' + (result.error || 'Không xác định'), 'danger');
+                        }
+                    } catch (error) {
+                        showAlert('Có lỗi xảy ra: ' + error.message, 'danger');
+                    }
+                }
+            });
+        }
+
+        // Show alert function
+        function showAlert(message, type) {
+            // Remove existing alerts first
+            const existingAlerts = document.querySelectorAll('.alert.position-fixed');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; max-width: 400px;';
+            alertDiv.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                    <span>${message}</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            // Auto remove after 5 seconds for error messages, 3 seconds for others
+            const timeout = type === 'danger' ? 5000 : 3000;
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, timeout);
+        }
+
+        // Initialize
+        (async () => { 
+            await loadKeysOptions(); 
+            await loadTTS(1); 
+        })();
+    });
 </script>
 {% endblock %}
 

@@ -23,6 +23,9 @@ class TTSQueue(db.Model):
     content = db.Column(db.Text, nullable=True)
     connection_id = db.Column(db.String(100), nullable=True)
     url = db.Column(db.String(500), nullable=True)
+    voice = db.Column(db.String(100), default='hn_female_ngochuyen_full_48k-fhg')
+    speech = db.Column(db.Integer, default=1)
+    punctuation = db.Column(db.String(100), default='0.45,0.25,0.3,0.6')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     

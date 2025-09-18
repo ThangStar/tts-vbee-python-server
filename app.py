@@ -21,38 +21,83 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 # Khởi tạo DB với app
 db.init_app(app)
 
-# @app.before_request
-# def create_tables():
-#     with app.app_context():
-#         db.create_all()
+@app.before_request
+def create_tables():
+    with app.app_context():
+        db.create_all()
         
-#         # Add remaining_chars column to admin_key table if it doesn't exist
-#         try:
-#             db.session.execute(text("ALTER TABLE admin_key ADD COLUMN remaining_chars INTEGER DEFAULT 0"))
-#             db.session.commit()
-#         except Exception as e:
-#             print(f"Column remaining_chars already exists or error: {e}")
+        # Add remaining_chars column to admin_key table if it doesn't exist
+        try:
+            db.session.execute(text("ALTER TABLE admin_key ADD COLUMN remaining_chars INTEGER DEFAULT 0"))
+            db.session.commit()
+        except Exception as e:
+            print(f"Column remaining_chars already exists or error: {e}")
         
-#         # Add content column to tts_queue table if it doesn't exist
-#         try:
-#             db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN content TEXT"))
-#             db.session.commit()
-#         except Exception as e:
-#             print(f"Column content already exists or error: {e}")
+        # Add content column to tts_queue table if it doesn't exist
+        try:
+            db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN content TEXT"))
+            db.session.commit()
+        except Exception as e:
+            print(f"Column content already exists or error: {e}")
         
-#         # Add connection_id column to tts_queue table if it doesn't exist
-#         try:
-#             db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN connection_id VARCHAR(100)"))
-#             db.session.commit()
-#         except Exception as e:
-#             print(f"Column connection_id already exists or error: {e}")
+        # Add connection_id column to tts_queue table if it doesn't exist
+        try:
+            db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN connection_id VARCHAR(100)"))
+            db.session.commit()
+        except Exception as e:
+            print(f"Column connection_id already exists or error: {e}")
         
-#         # Add url column to tts_queue table if it doesn't exist
-#         try:
-#             db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN url VARCHAR(500)"))
-#             db.session.commit()
-#         except Exception as e:
-#             print(f"Column url already exists or error: {e}")
+        # Add url column to tts_queue table if it doesn't exist
+        try:
+            db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN url VARCHAR(500)"))
+            db.session.commit()
+        except Exception as e:
+            print(f"Column url already exists or error: {e}")
+
+         # Add voice column to tts_queue table if it doesn't exist
+        try:
+            db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN voice VARCHAR(100) DEFAULT 'hn_female_ngochuyen_full_48k-fhg'"))
+            db.session.commit()
+            print("✓ Added voice column to tts_queue table")
+        except Exception as e:
+            if "duplicate column name" in str(e).lower() or "column voice already exists" in str(e).lower():
+                print("✓ Voice column already exists")
+            else:
+                print(f"✗ Error adding voice column: {e}")
+        
+        # Add speech column to tts_queue table if it doesn't exist
+        try:
+            db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN speech INTEGER DEFAULT 1"))
+            db.session.commit()
+            print("✓ Added speech column to tts_queue table")
+        except Exception as e:
+            if "duplicate column name" in str(e).lower() or "column speech already exists" in str(e).lower():
+                print("✓ Speech column already exists")
+            else:
+                print(f"✗ Error adding speech column: {e}")
+        
+        # Add punctuation column to tts_queue table if it doesn't exist
+        try:
+            db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN punctuation VARCHAR(100) DEFAULT '0.45,0.25,0.3,0.6'"))
+            db.session.commit()
+            print("✓ Added punctuation column to tts_queue table")
+        except Exception as e:
+            if "duplicate column name" in str(e).lower() or "column punctuation already exists" in str(e).lower():
+                print("✓ Punctuation column already exists")
+            else:
+                print(f"✗ Error adding punctuation column: {e}")
+        
+        # Update existing records to have default values
+        try:
+            db.session.execute(text("UPDATE tts_queue SET voice = 'hn_female_ngochuyen_full_48k-fhg' WHERE voice IS NULL"))
+            db.session.execute(text("UPDATE tts_queue SET speech = 1 WHERE speech IS NULL"))
+            db.session.execute(text("UPDATE tts_queue SET punctuation = '0.45,0.25,0.3,0.6' WHERE punctuation IS NULL"))
+            db.session.commit()
+            print("✓ Updated existing records with default values")
+        except Exception as e:
+            print(f"✗ Error updating existing records: {e}")
+        
+        print("\n🎉 Migration completed successfully!")
 
 @app.route('/')
 def index():
@@ -182,6 +227,9 @@ def list_tts():
                 'content': item.content,
                 'connection_id': item.connection_id,
                 'url': item.url,
+                'voice': item.voice,
+                'speech': item.speech,
+                'punctuation': item.punctuation,
                 'createdAt': item.created_at.strftime('%Y-%m-%d %H:%M:%S') if item.created_at else None,
                 'updatedAt': item.updated_at.strftime('%Y-%m-%d %H:%M:%S') if item.updated_at else None
             })
@@ -234,6 +282,9 @@ def get_tts_history():
                 'content': item.content,
                 'connection_id': item.connection_id,
                 'url': item.url,
+                'voice': item.voice,
+                'speech': item.speech,
+                'punctuation': item.punctuation,
                 'createdAt': item.created_at.strftime('%Y-%m-%d %H:%M:%S') if item.created_at else None,
                 'updatedAt': item.updated_at.strftime('%Y-%m-%d %H:%M:%S') if item.updated_at else None
             })
@@ -270,6 +321,9 @@ def get_new_tts():
             'content': item.content,
             'connection_id': item.connection_id,
             'url': item.url,
+            'voice': item.voice,
+            'speech': item.speech,
+            'punctuation': item.punctuation,
             'createdAt': item.created_at.strftime('%Y-%m-%d %H:%M:%S') if item.created_at else None,
             'updatedAt': item.updated_at.strftime('%Y-%m-%d %H:%M:%S') if item.updated_at else None
         }
@@ -289,6 +343,9 @@ def create_tts():
         text_char_count = data.get('text_char_count', 0)
         status = data.get('status', 'pending')
         url = data.get('url', '')
+        voice = data.get('voice', 'hn_female_ngochuyen_full_48k-fhg')
+        speech = data.get('speech', 1)
+        punctuation = data.get('punctuation', '0.45,0.25,0.3,0.6')
         
         # Find the admin key
         admin_key = AdminKey.query.filter_by(key=key).first()
@@ -300,7 +357,10 @@ def create_tts():
             text_char_count=text_char_count,
             status=status,
             content=content,
-            url=url
+            url=url,
+            voice=voice,
+            speech=speech,
+            punctuation=punctuation
         )
         
         db.session.add(new_tts)
@@ -313,6 +373,9 @@ def create_tts():
             'status': new_tts.status,
             'content': new_tts.content,
             'url': new_tts.url,
+            'voice': new_tts.voice,
+            'speech': new_tts.speech,
+            'punctuation': new_tts.punctuation,
             'createdAt': new_tts.created_at.strftime('%Y-%m-%d %H:%M:%S') if new_tts.created_at else None,
             'updatedAt': new_tts.updated_at.strftime('%Y-%m-%d %H:%M:%S') if new_tts.updated_at else None
         }), 201
@@ -339,6 +402,12 @@ def update_tts(tts_id):
             tts.content = data['content']
         if 'url' in data:
             tts.url = data['url']
+        if 'voice' in data:
+            tts.voice = data['voice']
+        if 'speech' in data:
+            tts.speech = data['speech']
+        if 'punctuation' in data:
+            tts.punctuation = data['punctuation']
         
         tts.updated_at = datetime.utcnow()
         db.session.commit()
@@ -350,6 +419,9 @@ def update_tts(tts_id):
             'status': tts.status,
             'content': tts.content,
             'url': tts.url,
+            'voice': tts.voice,
+            'speech': tts.speech,
+            'punctuation': tts.punctuation,
             'createdAt': tts.created_at.strftime('%Y-%m-%d %H:%M:%S') if tts.created_at else None,
             'updatedAt': tts.updated_at.strftime('%Y-%m-%d %H:%M:%S') if tts.updated_at else None
         })
@@ -427,7 +499,6 @@ def handle_enqueue_tts(data):
     print("\n" + "="*50,)
     print("SOCKET.IO EVENT: enqueue_tts",)
     print("="*50,)
-    
     try:
         key = data.get('key')
         content = data.get('content')
@@ -451,13 +522,21 @@ def handle_enqueue_tts(data):
         
         # Create TTS queue item
         print("Creating TTS queue item...",)
+        print("data", data)
+        # Get voice and speech from data, use defaults if not provided
+        voice = data.get('voice', 'hn_female_ngochuyen_full_48k-fhg')
+        speech = data.get('speech', 1)
+        punctuation = data.get('punctuation', '0.45,0.25,0.3,0.6')
         
         item = TTSQueue(
             key_id=admin_key.id,
             text_char_count=len(content),
             status='processing',
             content=content,
-            connection_id=request.sid
+            connection_id=request.sid,
+            voice=voice,
+            speech=speech,
+            punctuation=punctuation
         )
         
         print(f"TTS item created with ID: {item.id}",)
@@ -472,7 +551,10 @@ def handle_enqueue_tts(data):
         emit('enqueue_tts_result', {
             'ok': True, 
             'id': item.id, 
-            "status": 'Đang xử lý'
+            "status": 'Đang xử lý',
+            'voice': item.voice,
+            'speech': item.speech,
+            'punctuation': item.punctuation
         }, to=request.sid)
         
         # Start processing - no callback needed

@@ -4,3 +4,4 @@ flask_cors
 flask_sqlalchemy
 waitress==2.1.2
 eventlet==0.33.3
+requests

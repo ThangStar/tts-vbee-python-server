@@ -34,8 +34,8 @@ class ProcessTTS:
             print("Xử lý TTS..", item['key'], "\nID:", item['id'])
             
             # Simulate processing work here
-            print("item['content']", item['content'])
-            url = callback_tts(item['content'])
+            print("item", item)
+            url = callback_tts(item['content'], item['voice'], item['speech'], item['punctuation'])
 
             self.update_status(item, 'done', url)
             print(f"TTS {item.get('id')} processed with URL: {url}")

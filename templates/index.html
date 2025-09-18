@@ -1,16 +1,95 @@
 {% extends 'layout/base.html' %}
-{% block title %}Redirecting...{% endblock %}
+{% block title %}Đang chuyển hướng... - TTS Management{% endblock %}
 {% block body %}
-<div class="p-6 text-center text-gray-600">Đang chuyển hướng...</div>
+<div class="min-vh-100 d-flex align-items-center justify-content-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card-custom p-5 text-center">
+                    <!-- Loading Animation -->
+                    <div class="mb-4">
+                        <div class="loading-spinner mx-auto mb-3" style="width: 3rem; height: 3rem; border-width: 0.3rem;"></div>
+                        <h3 class="h4 fw-bold text-dark mb-2">Đang chuyển hướng...</h3>
+                        <p class="text-muted mb-0">Vui lòng chờ trong giây lát</p>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="progress mb-3" style="height: 6px;">
+                        <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" 
+                             role="progressbar" 
+                             style="width: 0%" 
+                             id="progressBar">
+                        </div>
+                    </div>
+
+                    <!-- Status Text -->
+                    <div class="text-muted small">
+                        <i class="bi bi-gear-fill me-1"></i>
+                        <span id="statusText">Đang kiểm tra trạng thái đăng nhập...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
+
 {% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script>
-    // Redirect to login or manager depending on localStorage
-    const ADMIN_KEY = localStorage.getItem('admin_key');
-    if (ADMIN_KEY === 'anhdagia716') {
-        window.location.replace('/manager/key');
-    } else {
-        window.location.replace('/login');
-    }
-    </script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const progressBar = document.getElementById('progressBar');
+        const statusText = document.getElementById('statusText');
+        
+        // Animate progress bar
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 90) progress = 90;
+            progressBar.style.width = progress + '%';
+        }, 200);
+
+        // Check authentication status
+        setTimeout(() => {
+            const ADMIN_KEY = localStorage.getItem('admin_key');
+            
+            if (ADMIN_KEY) {
+                // Check if key is valid (same logic as login)
+                const cryptedKey = CryptoJS.MD5(ADMIN_KEY).toString();
+                if (cryptedKey === "1b6fa9eeddb148b222ca507131d0e698") {
+                    statusText.innerHTML = '<i class="bi bi-check-circle-fill text-success me-1"></i>Đã đăng nhập, chuyển đến dashboard...';
+                    progressBar.style.width = '100%';
+                    progressBar.classList.remove('bg-primary');
+                    progressBar.classList.add('bg-success');
+                    
+                    setTimeout(() => {
+                        window.location.replace('/manager/key');
+                    }, 1000);
+                } else {
+                    // Invalid key, redirect to login
+                    statusText.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>Key không hợp lệ, chuyển đến trang đăng nhập...';
+                    progressBar.style.width = '100%';
+                    progressBar.classList.remove('bg-primary');
+                    progressBar.classList.add('bg-warning');
+                    
+                    setTimeout(() => {
+                        window.location.replace('/login');
+                    }, 1000);
+                }
+            } else {
+                // No key found, redirect to login
+                statusText.innerHTML = '<i class="bi bi-arrow-right-circle-fill text-info me-1"></i>Chưa đăng nhập, chuyển đến trang đăng nhập...';
+                progressBar.style.width = '100%';
+                progressBar.classList.remove('bg-primary');
+                progressBar.classList.add('bg-info');
+                
+                setTimeout(() => {
+                    window.location.replace('/login');
+                }, 1000);
+            }
+            
+            clearInterval(progressInterval);
+        }, 1500);
+    });
+</script>
 {% endblock %}

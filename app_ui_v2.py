@@ -100,7 +100,7 @@ class MinimalTTSApp:
         self.processing_thread = threading.Thread(target=_run, daemon=True)
         self.processing_thread.start()
 
-    def cb_start(self, content):
+    def cb_start(self, content, voice, speech, punctuation):
         try:
             url = None
             attempt = 0
@@ -136,14 +136,16 @@ class MinimalTTSApp:
                 self.log("Access token OK")
 
                 self.log("Gọi TTS...")
-                url = vbee_auto.tts(access_token, content, 1.0)
+                url = vbee_auto.tts(access_token, content, voice, speech, punctuation)
                 if url:
+                    self.log("TTS URL:", url)
                     break
                 attempt += 1
                 if attempt < max_retries:
                     self.log(f"URL None, thử lại ({attempt}/{max_retries})...")
                 else:
                     self.log("URL None sau khi thử tối đa, dừng lại.")
+                    break
                 self.log("TTS URL:", url)
             return url
         except Exception as e:
