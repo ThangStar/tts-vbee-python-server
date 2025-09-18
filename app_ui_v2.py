@@ -102,37 +102,48 @@ class MinimalTTSApp:
 
     def cb_start(self, content):
         try:
-            username = self.username_var.get().strip()
-            password = self.password_var.get().strip()
-            if not username or not password:
-                self.log("Thiếu username/password. Vui lòng lưu thông tin trước.")
-                return None
+            url = None
+            while attempt < max_retries:
+                username = self.username_var.get().strip()
+                password = self.password_var.get().strip()
+                if not username or not password:
+                    self.log("Thiếu username/password. Vui lòng lưu thông tin trước.")
+                    return None
 
-            creds = f"{username}:{password}"
-            self.log("Lấy session...")
-            vbee_auth = VbeeAuth()
-            session = vbee_auth.get_session()
-            self.log("Session:", session)
+                creds = f"{username}:{password}"
+                self.log("Lấy session...")
+                vbee_auth = VbeeAuth()
+                session = vbee_auth.get_session()
+                self.log("Session:", session)
 
-            self.log("Lấy refresh_token...")
-            print(creds)
-            refresh_token = vbee_auth.get_refresh_token(creds)
-            if not refresh_token:
-                self.log("Không lấy được refresh_token")
-                return None
-            self.log("Refresh token OK")
+                self.log("Lấy refresh_token...")
+                print(creds)
+                refresh_token = vbee_auth.get_refresh_token(creds)
+                if not refresh_token:
+                    self.log("Không lấy được refresh_token")
+                    return None
+                self.log("Refresh token OK")
 
-            self.log("Lấy access_token...")
-            vbee_auto = VbeeAuto()
-            access_token = vbee_auto.get_access_token(f"aivoice_refresh_token={refresh_token}")
-            if not access_token:
-                self.log("Không lấy được access_token")
-                return None
-            self.log("Access token OK")
+                self.log("Lấy access_token...")
+                vbee_auto = VbeeAuto()
+                access_token = vbee_auto.get_access_token(f"aivoice_refresh_token={refresh_token}")
+                if not access_token:
+                    self.log("Không lấy được access_token")
+                    return None
+                self.log("Access token OK")
 
-            self.log("Gọi TTS...")
-            url = vbee_auto.tts(access_token, content, 1.0)
-            self.log("TTS URL:", url)
+                self.log("Gọi TTS...")
+                max_retries = 3
+                attempt = 0
+                url = vbee_auto.tts(access_token, content, 1.0)
+                if url:
+                    break
+                attempt += 1
+                if attempt < max_retries:
+                    self.log(f"URL None, thử lại ({attempt}/{max_retries})...")
+                else:
+                    self.log("URL None sau khi thử tối đa, dừng lại.")
+                self.log("TTS URL:", url)
             return url
         except Exception as e:
             self.log("CONFIG ERROR", e)
