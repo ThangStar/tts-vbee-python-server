@@ -21,83 +21,83 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 # Khởi tạo DB với app
 db.init_app(app)
 
-@app.before_request
-def create_tables():
-    with app.app_context():
-        db.create_all()
+# @app.before_request
+# def create_tables():
+#     with app.app_context():
+#         db.create_all()
         
-        # Add remaining_chars column to admin_key table if it doesn't exist
-        try:
-            db.session.execute(text("ALTER TABLE admin_key ADD COLUMN remaining_chars INTEGER DEFAULT 0"))
-            db.session.commit()
-        except Exception as e:
-            print(f"Column remaining_chars already exists or error: {e}")
+#         # Add remaining_chars column to admin_key table if it doesn't exist
+#         try:
+#             db.session.execute(text("ALTER TABLE admin_key ADD COLUMN remaining_chars INTEGER DEFAULT 0"))
+#             db.session.commit()
+#         except Exception as e:
+#             print(f"Column remaining_chars already exists or error: {e}")
         
-        # Add content column to tts_queue table if it doesn't exist
-        try:
-            db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN content TEXT"))
-            db.session.commit()
-        except Exception as e:
-            print(f"Column content already exists or error: {e}")
+#         # Add content column to tts_queue table if it doesn't exist
+#         try:
+#             db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN content TEXT"))
+#             db.session.commit()
+#         except Exception as e:
+#             print(f"Column content already exists or error: {e}")
         
-        # Add connection_id column to tts_queue table if it doesn't exist
-        try:
-            db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN connection_id VARCHAR(100)"))
-            db.session.commit()
-        except Exception as e:
-            print(f"Column connection_id already exists or error: {e}")
+#         # Add connection_id column to tts_queue table if it doesn't exist
+#         try:
+#             db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN connection_id VARCHAR(100)"))
+#             db.session.commit()
+#         except Exception as e:
+#             print(f"Column connection_id already exists or error: {e}")
         
-        # Add url column to tts_queue table if it doesn't exist
-        try:
-            db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN url VARCHAR(500)"))
-            db.session.commit()
-        except Exception as e:
-            print(f"Column url already exists or error: {e}")
+#         # Add url column to tts_queue table if it doesn't exist
+#         try:
+#             db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN url VARCHAR(500)"))
+#             db.session.commit()
+#         except Exception as e:
+#             print(f"Column url already exists or error: {e}")
 
-         # Add voice column to tts_queue table if it doesn't exist
-        try:
-            db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN voice VARCHAR(100) DEFAULT 'hn_female_ngochuyen_full_48k-fhg'"))
-            db.session.commit()
-            print("✓ Added voice column to tts_queue table")
-        except Exception as e:
-            if "duplicate column name" in str(e).lower() or "column voice already exists" in str(e).lower():
-                print("✓ Voice column already exists")
-            else:
-                print(f"✗ Error adding voice column: {e}")
+#          # Add voice column to tts_queue table if it doesn't exist
+#         try:
+#             db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN voice VARCHAR(100) DEFAULT 'hn_female_ngochuyen_full_48k-fhg'"))
+#             db.session.commit()
+#             print("✓ Added voice column to tts_queue table")
+#         except Exception as e:
+#             if "duplicate column name" in str(e).lower() or "column voice already exists" in str(e).lower():
+#                 print("✓ Voice column already exists")
+#             else:
+#                 print(f"✗ Error adding voice column: {e}")
         
-        # Add speech column to tts_queue table if it doesn't exist
-        try:
-            db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN speech INTEGER DEFAULT 1"))
-            db.session.commit()
-            print("✓ Added speech column to tts_queue table")
-        except Exception as e:
-            if "duplicate column name" in str(e).lower() or "column speech already exists" in str(e).lower():
-                print("✓ Speech column already exists")
-            else:
-                print(f"✗ Error adding speech column: {e}")
+#         # Add speech column to tts_queue table if it doesn't exist
+#         try:
+#             db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN speech INTEGER DEFAULT 1"))
+#             db.session.commit()
+#             print("✓ Added speech column to tts_queue table")
+#         except Exception as e:
+#             if "duplicate column name" in str(e).lower() or "column speech already exists" in str(e).lower():
+#                 print("✓ Speech column already exists")
+#             else:
+#                 print(f"✗ Error adding speech column: {e}")
         
-        # Add punctuation column to tts_queue table if it doesn't exist
-        try:
-            db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN punctuation VARCHAR(100) DEFAULT '0.45,0.25,0.3,0.6'"))
-            db.session.commit()
-            print("✓ Added punctuation column to tts_queue table")
-        except Exception as e:
-            if "duplicate column name" in str(e).lower() or "column punctuation already exists" in str(e).lower():
-                print("✓ Punctuation column already exists")
-            else:
-                print(f"✗ Error adding punctuation column: {e}")
+#         # Add punctuation column to tts_queue table if it doesn't exist
+#         try:
+#             db.session.execute(text("ALTER TABLE tts_queue ADD COLUMN punctuation VARCHAR(100) DEFAULT '0.45,0.25,0.3,0.6'"))
+#             db.session.commit()
+#             print("✓ Added punctuation column to tts_queue table")
+#         except Exception as e:
+#             if "duplicate column name" in str(e).lower() or "column punctuation already exists" in str(e).lower():
+#                 print("✓ Punctuation column already exists")
+#             else:
+#                 print(f"✗ Error adding punctuation column: {e}")
         
-        # Update existing records to have default values
-        try:
-            db.session.execute(text("UPDATE tts_queue SET voice = 'hn_female_ngochuyen_full_48k-fhg' WHERE voice IS NULL"))
-            db.session.execute(text("UPDATE tts_queue SET speech = 1 WHERE speech IS NULL"))
-            db.session.execute(text("UPDATE tts_queue SET punctuation = '0.45,0.25,0.3,0.6' WHERE punctuation IS NULL"))
-            db.session.commit()
-            print("✓ Updated existing records with default values")
-        except Exception as e:
-            print(f"✗ Error updating existing records: {e}")
+#         # Update existing records to have default values
+#         try:
+#             db.session.execute(text("UPDATE tts_queue SET voice = 'hn_female_ngochuyen_full_48k-fhg' WHERE voice IS NULL"))
+#             db.session.execute(text("UPDATE tts_queue SET speech = 1 WHERE speech IS NULL"))
+#             db.session.execute(text("UPDATE tts_queue SET punctuation = '0.45,0.25,0.3,0.6' WHERE punctuation IS NULL"))
+#             db.session.commit()
+#             print("✓ Updated existing records with default values")
+#         except Exception as e:
+#             print(f"✗ Error updating existing records: {e}")
         
-        print("\n🎉 Migration completed successfully!")
+#         print("\n🎉 Migration completed successfully!")
 
 @app.route('/')
 def index():
