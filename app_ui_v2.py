@@ -103,6 +103,9 @@ class MinimalTTSApp:
     def cb_start(self, content):
         try:
             url = None
+            attempt = 0
+            max_retries = 3
+
             while attempt < max_retries:
                 username = self.username_var.get().strip()
                 password = self.password_var.get().strip()
@@ -133,8 +136,6 @@ class MinimalTTSApp:
                 self.log("Access token OK")
 
                 self.log("Gọi TTS...")
-                max_retries = 3
-                attempt = 0
                 url = vbee_auto.tts(access_token, content, 1.0)
                 if url:
                     break
